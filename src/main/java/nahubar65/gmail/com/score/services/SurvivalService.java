@@ -50,7 +50,7 @@ public class SurvivalService implements Service {
     private ParticleEffectStorage particleEffectStorage;
 
     public SurvivalService(SurvivalCore survivalCore){
-        this.mySQLConnector = new MySQLConnector("Kr3RwotSFxbNqF0U", "SurvivalCore", "localhost", "SurvivalCore");
+        this.mySQLConnector = new MySQLConnector("*contraseña*", "SurvivalCore", "localhost", "SurvivalCore");
         connection = mySQLConnector.getConnection();
         this.configuration = new Configuration(survivalCore, new File(survivalCore.getFolder(), "globalconfig.yml"));
         this.regionStorage = new RegionStorage(survivalCore);
