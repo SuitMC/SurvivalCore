@@ -38,7 +38,7 @@ public abstract class Command extends org.bukkit.command.Command {
                             for (int i = 1; i < args.length; i++) {
                                 args2[i - 1] = args[i];
                             }
-                            commandArgument.execute(sender, arg, args2);
+                            commandArgument.executeSubCommand(sender, arg, args2);
                             return true;
                         }
                     }
@@ -88,5 +88,9 @@ public abstract class Command extends org.bukkit.command.Command {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
+    }
+
+    public String color(String text){
+        return ChatColor.translateAlternateColorCodes('&', text);
     }
 }

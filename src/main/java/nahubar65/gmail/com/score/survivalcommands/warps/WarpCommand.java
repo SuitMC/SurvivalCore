@@ -30,8 +30,9 @@ public class WarpCommand extends Command {
     @Override
     public List<String> getHelp(CommandSender sender) {
         List<String> help = new ArrayList<>();
-        help.add("&9/score &bsetwarp <Nombre> &6-> &a&oColoca un nuevo warp.");
-        help.add("&9/score &bdelwarp <Nombre> &6-> &a&oElimina un warp existente.");
+        help.add("&9/warpmanager &bsetwarp <Nombre> &6-> &a&oColoca un nuevo warp.");
+        help.add("&9/warpmanager &bdelwarp <Nombre> &6-> &a&oElimina un warp existente.");
+        help.add("&9/warpmanager &bsetregion <Nombre> <Region> 66-> &a&oAtribuye una region a un warp.");
         return help;
     }
 

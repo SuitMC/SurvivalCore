@@ -76,7 +76,12 @@ public class Wand extends CommandArgument {
     }
 
     @Override
-    public String getPermission() {
-        return "score.region.wand";
+    public boolean canExecute(CommandSender commandSender) {
+        return true;
+    }
+
+    @Override
+    public void ifCantExecute(CommandSender commandSender) {
+
     }
 }

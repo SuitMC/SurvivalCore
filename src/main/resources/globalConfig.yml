@@ -1,0 +1,14 @@
+regions:
+  price-per-block: 7.91
+  max-regions-per-player: 2
+  region-bypass-permissions:
+    - 3
+    - 4
+    - 5
+    - 6
+  max-members-per-region: 3
+  region-member-bypass-permissions:
+    - 4
+    - 5
+    - 6
+    - 7

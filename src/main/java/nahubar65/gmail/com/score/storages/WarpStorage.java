@@ -1,7 +1,7 @@
 package nahubar65.gmail.com.score.storages;
 
 import nahubar65.gmail.com.score.configuration.Configuration;
-import nahubar65.gmail.com.score.utils.Region;
+import nahubar65.gmail.com.score.regions.Region;
 import nahubar65.gmail.com.score.utils.Warp;
 import org.bukkit.configuration.ConfigurationSection;
 

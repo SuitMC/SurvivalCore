@@ -47,9 +47,9 @@ public class DBMapWriter {
         }
     }
 
-    public Optional<Map<String, Object>> get(String key){
+    public Map<String, Object> get(String key){
+        Map<String, Object> map = new HashMap<>();
         try {
-            Map<String, Object> map = new HashMap<>();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM "+tableName+" WHERE ("+id+"='"+key+"')");
             resultSet.next();
             for (int i = 0; i < columns.length; i++) {
@@ -59,21 +59,23 @@ public class DBMapWriter {
                     o = bigDecimal.doubleValue();
                 }
                 map.put(columns[i], o);
-                Bukkit.getConsoleSender().sendMessage(o.toString() + columns[i]);
             }
-            return Optional.of(map);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
-        return Optional.empty();
+        return map;
     }
 
-    public void set(String key, Map<String, Object> map) {
+    public void set(String key, Object... objects) {
         try {
-            String query = "INSERT INTO "+tableName+" VALUES (?,"+values(map.size())+")";
+            String query;
+            if (!checkKey(key)) {
+                query = "INSERT INTO "+tableName+" VALUES ("+valuesToInsert()+")";
+            } else {
+                query = "UPDATE "+tableName+" SET "+valuesToUpdate()+" WHERE ("+id+"='"+key+"')";
+            }
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, key);
-            List<Object> objects = new ArrayList<>(map.values());
             int count = 1;
             for (Object object : objects) {
                 count++;
@@ -85,10 +87,11 @@ public class DBMapWriter {
         }
     }
 
-    private String values(int count){
+    private String valuesToInsert(){
         String values = "";
+        int count = columns.length;
         for (int i = 0; i < count; i++) {
-            String sign = "";
+            String sign;
             if (i >= count-1) {
                 sign = "?";
             } else if (i == 0) {
@@ -101,12 +104,30 @@ public class DBMapWriter {
         return values;
     }
 
-    public List<String> getKeys(){
+    private String valuesToUpdate(){
+        String values = "";
+        int count = columns.length;
+        for (int i = 0; i < count; i++) {
+            String keyName = columns[i];
+            String sign;
+            if (i >= count-1) {
+                sign = keyName+"=?";
+            } else if (i == 0) {
+                sign = keyName+"=?,";
+            } else {
+                sign = keyName+"=?,";
+            }
+            values+=sign;
+        }
+        return values;
+    }
+
+    public List<String> getKeys() {
         List<String> stringList = new ArrayList<>();
         try {
             String query = "SELECT * FROM "+tableName;
             ResultSet resultSet = statement.executeQuery(query);
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 String s = resultSet.getString(1);
                 stringList.add(s);
             }
@@ -114,5 +135,15 @@ public class DBMapWriter {
 
         }
         return stringList;
+    }
+
+    private boolean checkKey(String key) {
+        try {
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM "+tableName+" WHERE("+id+"='"+key+"')");
+            return resultSet.next();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return false;
     }
 }

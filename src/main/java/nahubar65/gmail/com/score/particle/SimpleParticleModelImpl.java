@@ -1,6 +1,10 @@
 package nahubar65.gmail.com.score.particle;
 
+import fr.mrmicky.fastparticle.FastParticle;
 import fr.mrmicky.fastparticle.ParticleType;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,5 +85,15 @@ public class SimpleParticleModelImpl implements ParticleModel {
         objectMap.put("particleType", particleType.name());
         objectMap.put("colored", colored);
         return objectMap;
+    }
+
+    public void spawnParticle(Location location, Player player) {
+        float extra = colored ? 1 : 0;
+        FastParticle.spawnParticle(player, particleType, location, amount, offSetX, offSetY, offSetZ, extra, 0);
+    }
+
+    public void spawnParticle(Location location) {
+        float extra = colored ? 1 : 0;
+        FastParticle.spawnParticle(location.getWorld(), particleType, location, amount, offSetX, offSetY, offSetZ, extra, 0);
     }
 }

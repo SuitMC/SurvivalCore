@@ -55,6 +55,9 @@ public class ParticleEffectStorage implements Storage<String, ParticleEffect> {
     public void remove(String key) {
         find(key).ifPresent(particleEffect -> {
             particleEffectMap.remove(key, particleEffect);
+            configuration.set("list."+key, null);
+            configuration.save();
+            particleEffect.stop();
         });
     }
 

@@ -10,22 +10,21 @@ import nahubar65.gmail.com.score.loader.CommandLoader;
 import nahubar65.gmail.com.score.loader.EventLoader;
 import nahubar65.gmail.com.score.storages.ParticleEffectStorage;
 import nahubar65.gmail.com.score.storages.PlayerInfoStorage;
-import nahubar65.gmail.com.score.storages.RegionStorage;
 import nahubar65.gmail.com.score.storages.WarpStorage;
-import nahubar65.gmail.com.score.survivalcommands.regions.RegionCommand;
 import nahubar65.gmail.com.score.survivalcommands.core.SCoreCommand;
 import nahubar65.gmail.com.score.survivalcommands.warps.Spawn;
 import nahubar65.gmail.com.score.survivalcommands.warps.WarpCommand;
 import nahubar65.gmail.com.score.survivalcommands.warps.WarpTeleport;
-import nahubar65.gmail.com.score.utils.Pair;
-import org.bukkit.Location;
+import team.unnamed.gui.MenuListeners;
 
 import java.io.File;
 import java.sql.Connection;
 
 public class SurvivalService implements Service {
 
-    private Configuration configuration;
+    private static Configuration configuration;
+
+    private static Connection connection;
 
     private CommandLoader commandLoader;
 
@@ -35,57 +34,52 @@ public class SurvivalService implements Service {
 
     private UUIDCache<Object> uuidCache;
 
-    private UUIDCache<Pair<Location, Location>> pairUUIDCache;
-
-    private RegionStorage regionStorage;
-
     private PlayerInfoStorage settingsStorage;
 
     private BossBarService bossBarService;
-
-    private static Connection connection;
 
     private MySQLConnector mySQLConnector;
 
     private ParticleEffectStorage particleEffectStorage;
 
-    public SurvivalService(SurvivalCore survivalCore){
-        this.mySQLConnector = new MySQLConnector("*contraseña*", "SurvivalCore", "localhost", "SurvivalCore");
+    private RegionService plotService;
+
+    public SurvivalService(SurvivalCore survivalCore) {
+        this.mySQLConnector = new MySQLConnector("Kr3RwotSFxbNqF0U", "SurvivalCore", "localhost", "SurvivalCore");
         connection = mySQLConnector.getConnection();
-        this.configuration = new Configuration(survivalCore, new File(survivalCore.getFolder(), "globalconfig.yml"));
-        this.regionStorage = new RegionStorage(survivalCore);
-        this.warpStorage = new WarpStorage(configuration, regionStorage);
-        this.uuidCache = new UUIDCache<>();
-        this.pairUUIDCache = new UUIDCache<>();
-        this.particleEffectStorage = new ParticleEffectStorage(new Configuration(survivalCore, new File(survivalCore.getFolder(), "particles.yml")));
-        this.commandLoader = new CommandLoader(
-                new SCoreCommand("score", warpStorage),
-                new Spawn("spawn", warpStorage, uuidCache, survivalCore),
-                new WarpTeleport("warp", warpStorage, uuidCache, survivalCore),
-                new RegionCommand("region", pairUUIDCache, regionStorage),
-                new WarpCommand("warpmanager", warpStorage, regionStorage),
-                new ParticleEffectCommand("particles", particleEffectStorage));
         File folderData = new File(survivalCore.getFolder(), "playerdata");
         if (!folderData.exists()) {
             folderData.mkdirs();
         }
+        this.configuration = new Configuration(survivalCore, new File(survivalCore.getFolder(), "globalConfig.yml"));
         this.settingsStorage = new PlayerInfoStorage(folderData);
+        this.plotService = new RegionService(connection, survivalCore);
         this.bossBarService = new BossBarService(survivalCore, settingsStorage);
+        this.uuidCache = new UUIDCache<>();
+        this.particleEffectStorage = new ParticleEffectStorage(new Configuration(survivalCore, new File(survivalCore.getFolder(), "particles.yml")));
+        this.warpStorage = new WarpStorage(configuration, plotService.getRegionStorage());
         this.eventLoader = new EventLoader(survivalCore,
                 new TeleportCommandListener(uuidCache),
                 new AbstractActionListeners(),
-                new RegionListeners(regionStorage),
                 new CustomEventListeners(),
-                new PlayerListeners(settingsStorage, folderData));
+                new PlayerListeners(settingsStorage, folderData),
+                new MenuListeners());
+        this.commandLoader = new CommandLoader(
+                new SCoreCommand("score", warpStorage),
+                new Spawn("spawn", warpStorage, uuidCache, survivalCore),
+                new WarpTeleport("warp", warpStorage, uuidCache, survivalCore),
+                new WarpCommand("warpmanager", warpStorage, plotService.getRegionStorage()),
+                new ParticleEffectCommand("particles", particleEffectStorage));
+        Service.register(this);
     }
 
     @Override
     public void start() {
         commandLoader.load();
         eventLoader.load();
-        regionStorage.loadAll();
         warpStorage.loadAll();
         bossBarService.start();
+        plotService.start();
         particleEffectStorage.loadAll();
     }
 
@@ -93,15 +87,16 @@ public class SurvivalService implements Service {
     public void stop() {
         settingsStorage.saveAll();
         warpStorage.saveAll();
-        regionStorage.saveAll();
         bossBarService.stop();
+        plotService.stop();
     }
 
-    public Configuration getConfiguration() {
+    @Override
+    public String serviceIdentifier() {
+        return "survivalService";
+    }
+
+    public static Configuration globalConfiguration() {
         return configuration;
-    }
-
-    public static Connection getConnection() {
-        return connection;
     }
 }

@@ -5,7 +5,7 @@ import nahubar65.gmail.com.score.command.Command;
 import nahubar65.gmail.com.score.command.CommandArgument;
 import nahubar65.gmail.com.score.storages.RegionStorage;
 import nahubar65.gmail.com.score.utils.Pair;
-import nahubar65.gmail.com.score.utils.Region;
+import nahubar65.gmail.com.score.regions.Region;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -29,11 +29,6 @@ public class CreateRegion extends CommandArgument {
 
         Pair<Location, Location> pair = uuidCache.find(player.getUniqueId());
 
-        if (pair.getKey() == null || pair.getValue() == null) {
-            sender.sendMessage("&c¡Una de las dos selecciones es nula!");
-            return;
-        }
-
         regionStorage.add(arg1, new Region(arg1, pair.getKey(), pair.getValue()));
         sender.sendMessage("&a¡Region &9"+arg1+" &acreada!");
         uuidCache.remove(player.getUniqueId());
@@ -55,7 +50,16 @@ public class CreateRegion extends CommandArgument {
     }
 
     @Override
-    public String getPermission() {
-        return null;
+    public boolean canExecute(CommandSender commandSender) {
+        Player player = (Player) commandSender;
+
+        Pair<Location, Location> pair = uuidCache.find(player.getUniqueId());
+
+        return pair.getKey() == null || pair.getValue() == null;
+    }
+
+    @Override
+    public void ifCantExecute(CommandSender commandSender) {
+        commandSender.sendMessage("&c¡Una de las dos selecciones es nula!");
     }
 }

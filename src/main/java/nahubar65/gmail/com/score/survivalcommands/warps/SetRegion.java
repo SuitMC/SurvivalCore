@@ -4,7 +4,7 @@ import nahubar65.gmail.com.score.command.Command;
 import nahubar65.gmail.com.score.command.CommandArgument;
 import nahubar65.gmail.com.score.storages.RegionStorage;
 import nahubar65.gmail.com.score.storages.WarpStorage;
-import nahubar65.gmail.com.score.utils.Region;
+import nahubar65.gmail.com.score.regions.Region;
 import nahubar65.gmail.com.score.utils.Warp;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -34,12 +34,12 @@ public class SetRegion extends CommandArgument {
                 Warp warp = warpOptional.get();
                 Region region = regionOptional.get();
                 warp.setRegion(region);
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aSe le ha atribuido al warp &9"+warp.getName()+" &ala region &B"+region.getName()+"&a."));
+                sender.sendMessage(color("&aSe le ha atribuido al warp &9"+warp.getName()+" &ala region &B"+region.getName()+"&a."));
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cUso incorrecto! "+usage()));
+                sender.sendMessage(color("&cUso incorrecto! "+usage()));
             }
         }else{
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cUso incorrecto! "+usage()));
+            sender.sendMessage(color("&cUso incorrecto! "+usage()));
         }
     }
 
@@ -59,7 +59,12 @@ public class SetRegion extends CommandArgument {
     }
 
     @Override
-    public String getPermission() {
-        return "score.admin.*";
+    public boolean canExecute(CommandSender commandSender) {
+        return false;
+    }
+
+    @Override
+    public void ifCantExecute(CommandSender commandSender) {
+
     }
 }

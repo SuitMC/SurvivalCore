@@ -3,7 +3,11 @@ package nahubar65.gmail.com.score.listeners;
 import nahubar65.gmail.com.score.actions.AbstractAction;
 import nahubar65.gmail.com.score.actions.ItemActionFactory;
 import nahubar65.gmail.com.score.actions.armorstands.ArmorStandActionFactory;
+import nahubar65.gmail.com.score.events.ServerShutdownEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -12,15 +16,17 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class AbstractActionListeners implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onInteract(PlayerInteractEvent event){
+    public void onInteract(PlayerInteractEvent event) {
         if (event.getItem() != null && event.getPlayer() != null) {
             ItemStack itemStack = event.getItem();
             AbstractAction action = ItemActionFactory.getAction(itemStack);
@@ -55,7 +61,7 @@ public class AbstractActionListeners implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onEntityInteract(PlayerInteractAtEntityEvent entityEvent){
         if (entityEvent.getRightClicked() instanceof ArmorStand) {
             ArmorStand armorStand = (ArmorStand) entityEvent.getRightClicked();
@@ -66,7 +72,7 @@ public class AbstractActionListeners implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onEntityDamage(EntityDamageByEntityEvent event) {
         if (event.getEntityType() == EntityType.ARMOR_STAND) {
             if (event.getDamager().getType() == EntityType.PLAYER) {
@@ -81,6 +87,32 @@ public class AbstractActionListeners implements Listener {
                         return;
                     }
                     action.performSpecialAction(player, event);
+                }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onClick(InventoryClickEvent event) {
+        if (event.getInventory() != null) {
+            ItemStack itemStack = event.getCurrentItem();
+            if (itemStack != null && itemStack.getType() != Material.AIR) {
+                AbstractAction action = ItemActionFactory.getAction(itemStack);
+                if (action != null) {
+                    ItemActionFactory.removeAction(itemStack);
+                }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onQuit(PlayerQuitEvent event) {
+        for (ItemStack itemStack : event.getPlayer().getInventory()) {
+            if (itemStack != null) {
+                AbstractAction action = ItemActionFactory.getAction(itemStack);
+                if (action != null) {
+                    ItemActionFactory.removeAction(itemStack);
+                    event.getPlayer().getInventory().removeItem(itemStack);
                 }
             }
         }

@@ -43,6 +43,8 @@ public class SpiralParticleEffect implements ParticleEffect {
 
     private int ticks;
 
+    private boolean started;
+
     private SpiralParticleEffect(double radius, ParticleModel particleModel, Location center, double limit){
         this.location = center.clone();
         this.radius = radius;
@@ -78,14 +80,32 @@ public class SpiralParticleEffect implements ParticleEffect {
         this.particleSender = player;
     }
 
+    @Override
+    public boolean started() {
+        return started;
+    }
+
     public void start(int ticks) {
         this.taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(SurvivalCore.plugin(), this, 0, 1);
         this.ticks = ticks;
+        this.started = true;
     }
 
     @Override
     public void stop() {
-        Bukkit.getScheduler().cancelTask(taskID);
+        if (started) {
+            Bukkit.getScheduler().cancelTask(taskID);
+        }
+    }
+
+    @Override
+    public Location getLocation() {
+        return location;
+    }
+
+    @Override
+    public ParticleEffectType getType() {
+        return ParticleEffectType.SPIRAL;
     }
 
     @Override
@@ -104,11 +124,7 @@ public class SpiralParticleEffect implements ParticleEffect {
         double cos = radius * Math.cos(angle);
         double sin = radius * Math.sin(angle);
         location.add(cos, y, sin);
-        if (particleModel.isColored()) {
-            spawnParticle(location);
-        }else{
-            spawnParticle(location);
-        }
+        spawnParticle(location);
         location.subtract(cos, y, sin);
         angle+=0.1 * spaceBetweenParticles;
         if (wait) return;
@@ -120,12 +136,13 @@ public class SpiralParticleEffect implements ParticleEffect {
     }
 
     private void spawnParticle(Location location){
+        float extra = particleModel.isColored() ? 1 : 0;
         if (particleSender instanceof Player) {
             Player player = (Player) particleSender;
-            FastParticle.spawnParticle(player, particleModel.getParticleType(), location, particleModel.amount(), particleModel.offSetX(), particleModel.offSetY(), particleModel.offSetZ(), 1, 0);
+            FastParticle.spawnParticle(player, particleModel.getParticleType(), location, particleModel.amount(), particleModel.offSetX(), particleModel.offSetY(), particleModel.offSetZ(), extra, 0);
         } else if (particleSender instanceof World) {
             World world = (World) particleSender;
-            FastParticle.spawnParticle(world, particleModel.getParticleType(), location, particleModel.amount(), particleModel.offSetX(), particleModel.offSetY(), particleModel.offSetZ(), 0, 0);
+            FastParticle.spawnParticle(world, particleModel.getParticleType(), location, particleModel.amount(), particleModel.offSetX(), particleModel.offSetY(), particleModel.offSetZ(), extra, 0);
         }
     }
 

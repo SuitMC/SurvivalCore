@@ -20,12 +20,15 @@ public class NMS {
 
     private static Class PACKET_CLASS;
 
+    private static Class<?> CHAT_BASE_COMPONENT;
+
     static {
         try {
             PLAYER_HANDLE = getCBClass("entity.CraftPlayer").getMethod("getHandle", null);
             PLAYER_CONNECTION = PLAYER_HANDLE.getReturnType().getField("playerConnection");
             PACKET_CLASS = getNMSClass("Packet");
             SEND_PACKET = PLAYER_CONNECTION.getType().getMethod("sendPacket", PACKET_CLASS);
+            CHAT_BASE_COMPONENT = getNMSClass("IChatBaseComponent");
         } catch (NoSuchMethodException | NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -61,19 +64,9 @@ public class NMS {
         return null;
     }
 
-    public static Object getHandle(Object object){
-        try {
-            return object.getClass().getMethod("getHandle", null).invoke(object, null);
-        } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     public static void sendTitle(Player player, String title, String subtitle, int fadeInTime, int showTime, int fadeOutTime) {
         try {
-            Object chatTitle = getNMSClass("IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", String.class)
-                    .invoke(null, "{\"text\": \"" + title + "\"}");
+            Object chatTitle = chatBaseComponent(title);
             Constructor<?> titleConstructor = getNMSClass("PacketPlayOutTitle").getConstructor(
                     getNMSClass("PacketPlayOutTitle").getDeclaredClasses()[0], getNMSClass("IChatBaseComponent"),
                     int.class, int.class, int.class);
@@ -81,8 +74,7 @@ public class NMS {
                     getNMSClass("PacketPlayOutTitle").getDeclaredClasses()[0].getField("TITLE").get(null), chatTitle,
                     fadeInTime, showTime, fadeOutTime);
 
-            Object chatsTitle = getNMSClass("IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", String.class)
-                    .invoke(null, "{\"text\": \"" + subtitle + "\"}");
+            Object chatsTitle = chatBaseComponent(subtitle);
             Constructor<?> timingTitleConstructor = getNMSClass("PacketPlayOutTitle").getConstructor(
                     getNMSClass("PacketPlayOutTitle").getDeclaredClasses()[0], getNMSClass("IChatBaseComponent"),
                     int.class, int.class, int.class);
@@ -95,5 +87,18 @@ public class NMS {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static Object chatBaseComponent(String message) {
+        try {
+            return CHAT_BASE_COMPONENT.getDeclaredClasses()[0].getMethod("a", String.class).invoke(null, "{\"text\": \"" + message + "\"}");
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

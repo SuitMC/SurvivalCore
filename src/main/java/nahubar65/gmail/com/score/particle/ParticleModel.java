@@ -2,7 +2,9 @@ package nahubar65.gmail.com.score.particle;
 
 import fr.mrmicky.fastparticle.ParticleType;
 import nahubar65.gmail.com.score.colors.Color;
+import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
 
 import java.util.Map;
@@ -23,6 +25,10 @@ public interface ParticleModel extends ConfigurationSerializable {
     boolean isColored();
 
     void setColored(boolean colored);
+
+    void spawnParticle(Location location, Player player);
+
+    void spawnParticle(Location location);
 
     static ParticleModel coloredParticle(Color color){
         return new SimpleParticleModelImpl(ParticleType.REDSTONE, 0, color.getRed(), color.getGreen(), color.getBlue(), true);

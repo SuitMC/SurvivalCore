@@ -1,6 +1,6 @@
 package nahubar65.gmail.com.score.combat.bossbar;
 
-import nahubar65.gmail.com.score.hook.VaultHook;
+import nahubar65.gmail.com.score.vault.VaultHook;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.milkbowl.vault.chat.Chat;
 import org.bukkit.Bukkit;
@@ -22,11 +22,12 @@ public class HealthEnemyBossBar {
 
     private BossBar bossBar;
 
-    private VaultHook vaultHook = VaultHook.INSTANCE;
+    private VaultHook vaultHook;
 
     public HealthEnemyBossBar(Player player, Player enemy){
         this.player = player.getUniqueId();
         this.enemy = enemy.getUniqueId();
+        this.vaultHook = VaultHook.getInstance();
         createBossBar();
         setCooldown(10);
     }

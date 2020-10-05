@@ -2,39 +2,26 @@ package nahubar65.gmail.com.score.storages;
 
 import nahubar65.gmail.com.score.SurvivalCore;
 import nahubar65.gmail.com.score.configuration.Configuration;
-import nahubar65.gmail.com.score.db.DBMapWriter;
-import nahubar65.gmail.com.score.utils.Region;
-import nahubar65.gmail.com.score.utils.Warp;
-import org.bukkit.Bukkit;
+import nahubar65.gmail.com.score.regions.GlobalRegionContainer;
+import nahubar65.gmail.com.score.regions.Region;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.File;
-import java.sql.*;
 import java.util.*;
 
-public class RegionStorage implements Storage<String, Region>{
+public class RegionStorage implements Storage<String, Region> {
 
     private Map<String, Region> warpMap;
 
     private Configuration configuration;
 
-    private Connection connection;
+    private GlobalRegionContainer globalRegionContainer;
 
-    private DBMapWriter dbMapWriter;
-
-    private boolean dbStorage;
-
-    public RegionStorage(SurvivalCore survivalCore){
+    public RegionStorage(SurvivalCore survivalCore, GlobalRegionContainer globalRegionContainer){
         this.warpMap = new HashMap<>();
         this.configuration = new Configuration(survivalCore, new File(survivalCore.getFolder(), "regions.yml"));
-    }
-
-    public RegionStorage(Connection connection, String tableName, String id) {
-        this.warpMap = new HashMap<>();
-        this.connection = connection;
-        this.dbMapWriter = new DBMapWriter(connection, tableName, id);
-        this.dbStorage = true;
+        this.globalRegionContainer = globalRegionContainer;
     }
 
     @Override
@@ -60,7 +47,7 @@ public class RegionStorage implements Storage<String, Region>{
     public Optional<Region> findFromData(String key) {
         ConfigurationSection configurationSection = configuration.getConfigurationSection("regions."+key);
         if (configurationSection != null) {
-            return Region.deserialize(configurationSection.getValues(true));
+            return Optional.of(Region.deserialize(configurationSection.getValues(true)));
         }
         return Optional.empty();
     }
@@ -79,12 +66,14 @@ public class RegionStorage implements Storage<String, Region>{
     @Override
     public void remove(String key) {
         warpMap.remove(key);
-        configuration.set(key, null);
+        configuration.set("regions."+key, null);
     }
 
     @Override
     public void add(String key, Region value) {
         get().put(key, value);
+        if (!globalRegionContainer.get().contains(value))
+            globalRegionContainer.get().add(value);
     }
 
     @Override
@@ -102,5 +91,6 @@ public class RegionStorage implements Storage<String, Region>{
                 findFromData(key).ifPresent(region -> add(key, region));
             }
         }
+
     }
 }

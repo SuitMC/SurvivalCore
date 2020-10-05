@@ -1,7 +1,6 @@
 package nahubar65.gmail.com.score.effect;
 
 import fr.mrmicky.fastparticle.FastParticle;
-import fr.mrmicky.fastparticle.ParticleType;
 import nahubar65.gmail.com.score.SurvivalCore;
 import nahubar65.gmail.com.score.particle.ParticleModel;
 import nahubar65.gmail.com.score.particle.SimpleParticleModelImpl;
@@ -11,6 +10,7 @@ import org.bukkit.World;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
+import org.bukkit.util.io.BukkitObjectInputStream;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,9 +30,11 @@ public class CircleParticleEffect implements ParticleEffect {
 
     private Object particleSender;
 
-    private double limit = 0;
+    private double spaceBetweenParticles = 0;
 
     private int ticks;
+
+    private boolean started;
 
     private CircleParticleEffect(double radius, Location location, ParticleModel particleModel){
         this.particleModel = particleModel;
@@ -40,54 +42,69 @@ public class CircleParticleEffect implements ParticleEffect {
         this.radius = radius;
     }
 
-    public CircleParticleEffect(Player player, double radius, Location location, ParticleModel particleModel, double limit){
+    public CircleParticleEffect(Player player, double radius, Location location, ParticleModel particleModel, double spaceBetweenParticles){
         this(radius, location, particleModel);
         this.particleSender = player;
-        if (limit > 0)
-            this.limit = limit;
+        if (spaceBetweenParticles > 0)
+            this.spaceBetweenParticles = spaceBetweenParticles;
     }
 
-    public CircleParticleEffect(World world, double radius, Location location, ParticleModel particleModel, double limit){
+    public CircleParticleEffect(World world, double radius, Location location, ParticleModel particleModel, double spaceBetweenParticles){
         this(radius, location, particleModel);
         this.particleSender = world;
-        if (limit > 0)
-            this.limit = limit;
+        if (spaceBetweenParticles > 0)
+            this.spaceBetweenParticles = spaceBetweenParticles;
     }
 
     @Override
     public void run() {
-        angle += 0.1;
-        double cos = radius * Math.cos(angle) * limit;
-        double sin = radius * Math.sin(angle) * limit;
-        if (limit > 0) {
-            cos = cos * limit;
-            cos = cos * limit;
-        }
+        double angleToDegrees = Math.toDegrees(angle);
+        if(angleToDegrees >= (360 * spaceBetweenParticles))
+            angle = 0;
+        double cos = radius * Math.cos(angle);
+        double sin = radius * Math.sin(angle);
         location.add(cos, 0, sin);
-        if (particleModel.isColored()) {
-            spawnParticle(location);
-        }else{
-            spawnParticle(location);
-        }
+        spawnParticle(location);
         location.subtract(cos, 0, sin);
+        angle += 0.1 * spaceBetweenParticles;
     }
 
-    public void start(int ticks){
-        this.taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(SurvivalCore.plugin(), this, 0, ticks);
+    @Override
+    public boolean started() {
+        return started;
+    }
+
+    public void start(int ticks) {
+        this.taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(SurvivalCore.plugin(), this, 0, 1);
         this.ticks = ticks;
+        this.started = true;
     }
 
-    public void stop(){
-        Bukkit.getScheduler().cancelTask(taskID);
+    @Override
+    public void stop() {
+        if (started) {
+            Bukkit.getScheduler().cancelTask(taskID);
+        }
+    }
+
+    @Override
+    public Location getLocation() {
+        return location;
+    }
+
+    @Override
+    public ParticleEffectType getType() {
+        return ParticleEffectType.CIRCLE;
     }
 
     private void spawnParticle(Location location){
+        float extra = particleModel.isColored() ? 1 : 0;
         if (particleSender instanceof Player) {
             Player player = (Player) particleSender;
-            FastParticle.spawnParticle(player, particleModel.getParticleType(), location, particleModel.amount(), particleModel.offSetX(), particleModel.offSetY(), particleModel.offSetZ(), 1, 0);
+            FastParticle.spawnParticle(player, particleModel.getParticleType(), location, particleModel.amount(), particleModel.offSetX(), particleModel.offSetY(), particleModel.offSetZ(), extra, 0);
         } else if (particleSender instanceof World) {
             World world = (World) particleSender;
-            FastParticle.spawnParticle(world, particleModel.getParticleType(), location, particleModel.amount(), particleModel.offSetX(), particleModel.offSetY(), particleModel.offSetZ(), 0, 0);
+            FastParticle.spawnParticle(world, particleModel.getParticleType(), location, particleModel.amount(), particleModel.offSetX(), particleModel.offSetY(), particleModel.offSetZ(), extra, 0);
         }
     }
 
@@ -96,7 +113,7 @@ public class CircleParticleEffect implements ParticleEffect {
         Map<String, Object> objectMap = new HashMap<>();
         objectMap.put("location", location.serialize());
         objectMap.put("radius", radius);
-        objectMap.put("limit", limit);
+        objectMap.put("limit", spaceBetweenParticles);
         objectMap.put("particleModel", particleModel.serialize());
         objectMap.put("ticks", ticks);
         objectMap.put("type", ParticleEffectType.CIRCLE.name());

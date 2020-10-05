@@ -55,11 +55,12 @@ public class SetWarp extends CommandArgument {
     }
 
     @Override
-    public String getPermission() {
-        return "score.admin.*";
+    public boolean canExecute(CommandSender commandSender) {
+        return true;
     }
 
-    private String color(String text){
-        return ChatColor.translateAlternateColorCodes('&', text);
+    @Override
+    public void ifCantExecute(CommandSender commandSender) {
+
     }
 }

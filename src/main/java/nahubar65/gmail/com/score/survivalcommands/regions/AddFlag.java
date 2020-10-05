@@ -3,8 +3,8 @@ package nahubar65.gmail.com.score.survivalcommands.regions;
 import nahubar65.gmail.com.score.command.Command;
 import nahubar65.gmail.com.score.command.CommandArgument;
 import nahubar65.gmail.com.score.storages.RegionStorage;
-import nahubar65.gmail.com.score.utils.Region;
-import nahubar65.gmail.com.score.utils.RegionFlag;
+import nahubar65.gmail.com.score.regions.Region;
+import nahubar65.gmail.com.score.regions.RegionFlag;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -29,7 +29,7 @@ public class AddFlag extends CommandArgument {
                 String arg3 = args[2];
                 Region region = regionOptional.get();
                 try {
-                    RegionFlag regionFlag = RegionFlag.valueOf(arg2);
+                    RegionFlag regionFlag = RegionFlag.valueOf(arg2.toUpperCase());
                     Boolean b = arg3.equalsIgnoreCase("true");
                     region.addFlag(regionFlag, b);
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aFlag &9"+regionFlag.name()+" &aañadido."));
@@ -58,7 +58,12 @@ public class AddFlag extends CommandArgument {
     }
 
     @Override
-    public String getPermission() {
-        return "score.region.addflag";
+    public boolean canExecute(CommandSender commandSender) {
+        return true;
+    }
+
+    @Override
+    public void ifCantExecute(CommandSender commandSender) {
+
     }
 }

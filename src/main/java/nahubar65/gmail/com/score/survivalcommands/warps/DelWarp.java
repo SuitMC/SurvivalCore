@@ -49,7 +49,12 @@ public class DelWarp extends CommandArgument {
     }
 
     @Override
-    public String getPermission() {
-        return "score.admin.*";
+    public boolean canExecute(CommandSender commandSender) {
+        return true;
+    }
+
+    @Override
+    public void ifCantExecute(CommandSender commandSender) {
+
     }
 }

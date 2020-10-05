@@ -57,7 +57,8 @@ public class CreateParticle extends CommandArgument {
 
                 int ticks = Integer.valueOf(args[3]);
 
-                double limit = Double.valueOf(args[4]);
+                int spaceBetweenParticles = 1;
+                spaceBetweenParticles = Integer.valueOf(args[4]);
 
                 switch (particleEffectType) {
                     case CIRCLE:
@@ -65,15 +66,15 @@ public class CreateParticle extends CommandArgument {
                                 radius,
                                 location,
                                 simpleParticleModel,
-                                limit);
+                                spaceBetweenParticles);
                         particleEffect.start(ticks);
                         particleEffectStorage.add(particleEffect);
                         break;
                     case SPIRAL:
                         if (args.length > 4) {
-                            int spaceBetweenParticles = 1;
-                            if (args.length > 5) {
-                                spaceBetweenParticles = Integer.valueOf(args[4]);
+                            double limit = 1;
+                            if (args.length > 6) {
+                                 limit = Double.valueOf(args[5]);
                             }
                             particleEffect = new SpiralParticleEffect(location.getWorld(),
                                     radius,
@@ -114,8 +115,13 @@ public class CreateParticle extends CommandArgument {
     }
 
     @Override
-    public String getPermission() {
-        return "score.particles.create";
+    public boolean canExecute(CommandSender commandSender) {
+        return true;
+    }
+
+    @Override
+    public void ifCantExecute(CommandSender commandSender) {
+
     }
 
     private Color getColor(String s){

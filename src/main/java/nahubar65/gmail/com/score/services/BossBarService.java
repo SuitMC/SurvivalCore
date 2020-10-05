@@ -25,6 +25,7 @@ public class BossBarService implements Service {
                 new EnemyBossBarListener(uuidCache, settingsStorage));
         this.enemyBossBarUpdater = new EnemyBossBarUpdater(uuidCache);
         this.survivalCore = survivalCore;
+        Service.register(this);
     }
 
     @Override
@@ -36,5 +37,10 @@ public class BossBarService implements Service {
     @Override
     public void stop() {
 
+    }
+
+    @Override
+    public String serviceIdentifier() {
+        return "bossBarService";
     }
 }

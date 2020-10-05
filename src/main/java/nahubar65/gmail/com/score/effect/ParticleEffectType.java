@@ -23,7 +23,6 @@ public enum ParticleEffectType {
 
     public static Optional<ParticleEffect> deserializeFromConfig(Map<String, Object> objectMap, boolean start) {
         ParticleEffectType type = valueOf(((String) objectMap.get("type")).toUpperCase());
-        Bukkit.getConsoleSender().sendMessage(type.name());
         try {
             Optional<ParticleEffect> particleEffect = (Optional<ParticleEffect>) type.clazz.getMethod("deserialize", Map.class, boolean.class).invoke(null, objectMap, start);
             return particleEffect;

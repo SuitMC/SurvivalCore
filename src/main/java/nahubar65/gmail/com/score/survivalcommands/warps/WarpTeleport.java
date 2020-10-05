@@ -60,8 +60,4 @@ public class WarpTeleport extends Command {
     public boolean zeroArguments() {
         return true;
     }
-
-    private String color(String text){
-        return ChatColor.translateAlternateColorCodes('&', text);
-    }
 }

@@ -1,5 +1,6 @@
 package nahubar65.gmail.com.score.utils;
 
+import nahubar65.gmail.com.score.regions.Region;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.MemorySection;
